@@ -30,7 +30,7 @@ export default function HomeScreen() {
       <StatusBar style="dark" />
 
       <View style={styles.card}>
-        <Text style={styles.title}>ITIL Study App</Text>
+        <Text style={styles.title}>Welcome to PassPilot!</Text>
 
         {isTesting && <ActivityIndicator size="large" />}
 
