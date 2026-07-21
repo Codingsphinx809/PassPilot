@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "itil-study-app",
-    "slug": "itil-study-app",
+    "name": "PassPilot",
+    "slug": "passpilot-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "itilstudyapp",
+    "scheme": "passpilot",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
