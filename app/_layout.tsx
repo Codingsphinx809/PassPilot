@@ -3,12 +3,39 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from '@react-navigation/native';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import AuthGate from '@/providers/AuthGate';
-import { SessionProvider } from '@/providers/SessionProvider';
+import { SessionProvider, useSession } from '@/providers/SessionProvider';
+
+function RootNavigator() {
+  const { session, loading } = useSession();
+
+  if (loading) {
+    return null;
+  }
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="modal"
+          options={{
+            presentation: 'modal',
+            title: 'Modal',
+          }}
+        />
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -18,7 +45,7 @@ export default function RootLayout() {
       <ThemeProvider
         value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
       >
-        <AuthGate />
+        <RootNavigator />
         <StatusBar style="auto" />
       </ThemeProvider>
     </SessionProvider>
