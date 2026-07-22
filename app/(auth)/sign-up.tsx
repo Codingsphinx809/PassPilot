@@ -1,43 +1,51 @@
-import { useState } from 'react';
+import { router } from "expo-router";
+import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { router } from 'expo-router';
+} from "react-native";
 
-import { supabase } from '../../services/supabase/client';
+import { supabase } from "@/services/supabase/client";
 
 export default function SignUpScreen() {
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSignUp = async () => {
-    const normalizedEmail = email.trim().toLowerCase();
+  async function handleSignUp() {
     const normalizedName = fullName.trim();
+    const normalizedEmail = email.trim().toLowerCase();
 
-    if (!normalizedName || !normalizedEmail || !password) {
-      Alert.alert('Missing information', 'Please complete every field.');
+    if (!normalizedName || !normalizedEmail || !password || !confirmPassword) {
+      Alert.alert("Missing information", "Please complete every field.");
       return;
     }
 
     if (password.length < 8) {
       Alert.alert(
-        'Password too short',
-        'Your password must contain at least 8 characters.'
+        "Password too short",
+        "Your password must be at least 8 characters long.",
       );
       return;
     }
 
+    if (password !== confirmPassword) {
+      Alert.alert("Passwords do not match", "Please enter them again.");
+      return;
+    }
+
     try {
-      setLoading(true);
+      setIsSubmitting(true);
 
       const { data, error } = await supabase.auth.signUp({
         email: normalizedEmail,
@@ -50,133 +58,132 @@ export default function SignUpScreen() {
       });
 
       if (error) {
-        throw error;
-      }
-
-      if (!data.user) {
-        throw new Error('Supabase did not return a user account.');
-      }
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user.id,
-          full_name: normalizedName,
-        });
-
-      if (profileError) {
-        throw profileError;
+        Alert.alert("Unable to create account", error.message);
+        return;
       }
 
       if (!data.session) {
         Alert.alert(
-          'Check your email',
-          'Your account was created. Open the confirmation email before signing in.'
+          "Check your email",
+          "Your account was created. Open the confirmation email before signing in.",
+          [
+            {
+              text: "Go to sign in",
+              onPress: () => router.replace("/(auth)/sign-in"),
+            },
+          ],
         );
-
-        router.replace('/(auth)/sign-in');
         return;
       }
 
-      router.replace('/');
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Unable to create your account.';
-
-      Alert.alert('Sign-up failed', message);
+      router.replace("/(tabs)");
+    } catch {
+      Alert.alert(
+        "Something went wrong",
+        "We could not create your account. Please try again.",
+      );
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
     >
-      <View style={styles.content}>
-        <Text style={styles.eyebrow}>PASSPILOT</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
+          <Text style={styles.brand}>PassPilot</Text>
+          <Text style={styles.title}>Create your account</Text>
+          <Text style={styles.subtitle}>
+            Start building your personalized certification study plan.
+          </Text>
 
-        <Text style={styles.title}>Create your account</Text>
-
-        <Text style={styles.subtitle}>
-          Start building a personalized path toward your certification.
-        </Text>
-
-        <View style={styles.form}>
-          <View style={styles.field}>
+          <View style={styles.form}>
             <Text style={styles.label}>Full name</Text>
+
             <TextInput
-              value={fullName}
+              autoComplete="name"
+              editable={!isSubmitting}
               onChangeText={setFullName}
               placeholder="Your full name"
-              autoCapitalize="words"
-              autoComplete="name"
-              editable={!loading}
               style={styles.input}
+              value={fullName}
             />
-          </View>
 
-          <View style={styles.field}>
             <Text style={styles.label}>Email address</Text>
+
             <TextInput
-              value={email}
+              autoCapitalize="none"
+              autoComplete="email"
+              editable={!isSubmitting}
+              keyboardType="email-address"
               onChangeText={setEmail}
               placeholder="you@example.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-              editable={!loading}
               style={styles.input}
+              value={email}
             />
-          </View>
 
-          <View style={styles.field}>
             <Text style={styles.label}>Password</Text>
+
             <TextInput
-              value={password}
+              autoCapitalize="none"
+              autoComplete="new-password"
+              editable={!isSubmitting}
               onChangeText={setPassword}
               placeholder="At least 8 characters"
               secureTextEntry
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="new-password"
-              editable={!loading}
               style={styles.input}
+              value={password}
             />
+
+            <Text style={styles.label}>Confirm password</Text>
+
+            <TextInput
+              autoCapitalize="none"
+              autoComplete="new-password"
+              editable={!isSubmitting}
+              onChangeText={setConfirmPassword}
+              onSubmitEditing={handleSignUp}
+              placeholder="Enter your password again"
+              secureTextEntry
+              style={styles.input}
+              value={confirmPassword}
+            />
+
+            <Pressable
+              disabled={isSubmitting}
+              onPress={handleSignUp}
+              style={({ pressed }) => [
+                styles.primaryButton,
+                pressed && styles.buttonPressed,
+                isSubmitting && styles.buttonDisabled,
+              ]}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.primaryButtonText}>Create account</Text>
+              )}
+            </Pressable>
+
+            <Pressable
+              disabled={isSubmitting}
+              onPress={() => router.replace("/(auth)/sign-in")}
+              style={styles.secondaryButton}
+            >
+              <Text style={styles.secondaryButtonText}>
+                Already have an account?{" "}
+                <Text style={styles.linkText}>Sign in</Text>
+              </Text>
+            </Pressable>
           </View>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Create account"
-            disabled={loading}
-            onPress={handleSignUp}
-            style={({ pressed }) => [
-              styles.primaryButton,
-              pressed && styles.buttonPressed,
-              loading && styles.buttonDisabled,
-            ]}
-          >
-            <Text style={styles.primaryButtonText}>
-              {loading ? 'Creating account…' : 'Create account'}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push('/(auth)/sign-in')}
-            disabled={loading}
-            style={styles.linkButton}
-          >
-            <Text style={styles.linkText}>
-              Already have an account? Sign in
-            </Text>
-          </Pressable>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -184,80 +191,81 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
+    backgroundColor: "#F7F9FC",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
   },
   content: {
-    flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingVertical: 40,
   },
-  eyebrow: {
-    marginBottom: 12,
-    color: '#2563EB',
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 1.5,
+  brand: {
+    marginBottom: 18,
+    color: "#2563EB",
+    fontSize: 20,
+    fontWeight: "800",
   },
   title: {
-    color: '#0F172A',
-    fontSize: 32,
-    fontWeight: '800',
-    lineHeight: 38,
+    color: "#0F172A",
+    fontSize: 34,
+    fontWeight: "800",
   },
   subtitle: {
-    marginTop: 12,
-    color: '#475569',
+    marginTop: 10,
+    color: "#475569",
     fontSize: 16,
     lineHeight: 24,
   },
   form: {
     marginTop: 32,
-    gap: 18,
-  },
-  field: {
-    gap: 8,
   },
   label: {
-    color: '#1E293B',
+    marginBottom: 8,
+    color: "#334155",
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   input: {
-    minHeight: 52,
+    minHeight: 54,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: "#CBD5E1",
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
-    color: '#0F172A',
+    color: "#0F172A",
     fontSize: 16,
   },
   primaryButton: {
-    minHeight: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
+    minHeight: 54,
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 12,
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 20,
+    backgroundColor: "#2563EB",
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   buttonPressed: {
     opacity: 0.85,
   },
   buttonDisabled: {
-    opacity: 0.55,
+    opacity: 0.65,
   },
-  linkButton: {
-    alignItems: 'center',
-    paddingVertical: 8,
+  secondaryButton: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  secondaryButtonText: {
+    color: "#475569",
+    fontSize: 15,
   },
   linkText: {
-    color: '#2563EB',
-    fontSize: 15,
-    fontWeight: '700',
+    color: "#2563EB",
+    fontWeight: "800",
   },
 });
