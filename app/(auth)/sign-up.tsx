@@ -40,7 +40,10 @@ export default function SignUpScreen() {
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Passwords do not match", "Please enter them again.");
+      Alert.alert(
+        "Passwords do not match",
+        "Make sure both password fields are identical.",
+      );
       return;
     }
 
@@ -63,16 +66,13 @@ export default function SignUpScreen() {
       }
 
       if (!data.session) {
-        Alert.alert(
-          "Check your email",
-          "Your account was created. Open the confirmation email before signing in.",
-          [
-            {
-              text: "Go to sign in",
-              onPress: () => router.replace("/(auth)/sign-in"),
-            },
-          ],
-        );
+        router.replace({
+          pathname: "/(auth)/check-email",
+          params: {
+            email: normalizedEmail,
+          },
+        });
+
         return;
       }
 
@@ -98,7 +98,9 @@ export default function SignUpScreen() {
       >
         <View style={styles.content}>
           <Text style={styles.brand}>PassPilot</Text>
+
           <Text style={styles.title}>Create your account</Text>
+
           <Text style={styles.subtitle}>
             Start building your personalized certification study plan.
           </Text>
@@ -111,6 +113,7 @@ export default function SignUpScreen() {
               editable={!isSubmitting}
               onChangeText={setFullName}
               placeholder="Your full name"
+              returnKeyType="next"
               style={styles.input}
               value={fullName}
             />
@@ -124,6 +127,7 @@ export default function SignUpScreen() {
               keyboardType="email-address"
               onChangeText={setEmail}
               placeholder="you@example.com"
+              returnKeyType="next"
               style={styles.input}
               value={email}
             />
@@ -136,6 +140,7 @@ export default function SignUpScreen() {
               editable={!isSubmitting}
               onChangeText={setPassword}
               placeholder="At least 8 characters"
+              returnKeyType="next"
               secureTextEntry
               style={styles.input}
               value={password}
@@ -150,6 +155,7 @@ export default function SignUpScreen() {
               onChangeText={setConfirmPassword}
               onSubmitEditing={handleSignUp}
               placeholder="Enter your password again"
+              returnKeyType="done"
               secureTextEntry
               style={styles.input}
               value={confirmPassword}
