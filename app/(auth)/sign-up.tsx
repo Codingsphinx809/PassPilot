@@ -23,6 +23,7 @@ export default function SignUpScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSignUp() {
+    Alert.alert("Test", "The Create Account button is working.");
     const normalizedName = fullName.trim();
     const normalizedEmail = email.trim().toLowerCase();
 
