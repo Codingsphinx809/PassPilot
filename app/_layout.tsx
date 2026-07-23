@@ -64,7 +64,6 @@ function RootNavigator() {
 
       const isOnAuthScreen = segments[0] === "(auth)";
       const isOnOnboardingScreen = segments[0] === "onboarding";
-      const isOnTabsScreen = segments[0] === "(tabs)";
 
       if (!onboardingIsComplete && !isOnOnboardingScreen) {
         router.replace("/onboarding");
@@ -73,7 +72,7 @@ function RootNavigator() {
 
       if (
         onboardingIsComplete &&
-        (isOnAuthScreen || isOnOnboardingScreen || !isOnTabsScreen)
+        (isOnAuthScreen || isOnOnboardingScreen)
       ) {
         router.replace("/(tabs)");
       }
@@ -105,6 +104,7 @@ function RootNavigator() {
       <Stack.Protected guard={Boolean(session)}>
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="lesson/[id]" />
 
         <Stack.Screen
           name="modal"
