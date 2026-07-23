@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -15,9 +15,17 @@ import {
 import { supabase } from "@/services/supabase/client";
 
 export default function SignInScreen() {
+  const params = useLocalSearchParams<{ email?: string }>();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (typeof params.email === "string" && params.email.trim()) {
+      setEmail(params.email.trim().toLowerCase());
+    }
+  }, [params.email]);
 
   async function handleSignIn() {
     const normalizedEmail = email.trim().toLowerCase();
@@ -40,8 +48,13 @@ export default function SignInScreen() {
         return;
       }
 
-      router.replace("/(tabs)");
-    } catch {
+      /*
+       * Your SessionProvider and protected routes should automatically
+       * switch from the auth screens to the tabs after sign-in.
+       */
+    } catch (error) {
+      console.error("Sign-in error:", error);
+
       Alert.alert(
         "Something went wrong",
         "We could not sign you in. Please try again.",
@@ -75,6 +88,7 @@ export default function SignInScreen() {
             keyboardType="email-address"
             onChangeText={setEmail}
             placeholder="you@example.com"
+            returnKeyType="next"
             style={styles.input}
             value={email}
           />
@@ -88,6 +102,7 @@ export default function SignInScreen() {
             onChangeText={setPassword}
             onSubmitEditing={handleSignIn}
             placeholder="Enter your password"
+            returnKeyType="done"
             secureTextEntry
             style={styles.passwordInput}
             value={password}
@@ -198,8 +213,8 @@ const styles = StyleSheet.create({
   },
   forgotPassword: {
     alignSelf: "flex-end",
-    paddingVertical: 12,
     marginBottom: 8,
+    paddingVertical: 12,
   },
   forgotPasswordText: {
     color: "#2563EB",

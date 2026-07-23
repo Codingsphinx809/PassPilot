@@ -7,6 +7,9 @@ import { AppState, Platform } from "react-native";
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
+console.log("SUPABASE URL:", process.env.EXPO_PUBLIC_SUPABASE_URL);
+console.log("SUPABASE KEY:", process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+
 if (!supabaseUrl || !supabasePublishableKey) {
   throw new Error(
     "Missing Supabase environment variables. Check the .env file.",
@@ -31,3 +34,4 @@ if (Platform.OS !== "web") {
     }
   });
 }
+ 

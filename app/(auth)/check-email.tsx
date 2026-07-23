@@ -1,12 +1,12 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 import { supabase } from "@/services/supabase/client";
@@ -42,10 +42,12 @@ export default function CheckEmailScreen() {
       }
 
       Alert.alert(
-        "Email sent",
-        `A new confirmation email was sent to ${email}.`,
+        "Confirmation email sent",
+        `We sent another confirmation email to ${email}.`,
       );
-    } catch {
+    } catch (error) {
+      console.error("Resend confirmation error:", error);
+
       Alert.alert(
         "Something went wrong",
         "We could not resend the confirmation email.",
@@ -66,14 +68,14 @@ export default function CheckEmailScreen() {
       <Text style={styles.title}>Check your email</Text>
 
       <Text style={styles.subtitle}>
-        We created your account and sent a confirmation link to:
+        Your account was created. We sent a confirmation link to:
       </Text>
 
       {email ? <Text style={styles.email}>{email}</Text> : null}
 
       <Text style={styles.instructions}>
-        Open the email and tap the confirmation link. After your email is
-        verified, return to PassPilot and sign in.
+        Open the message and tap the confirmation link. After confirming your
+        email, return to PassPilot and sign in.
       </Text>
 
       <Pressable

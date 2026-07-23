@@ -23,7 +23,6 @@ export default function SignUpScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSignUp() {
-    Alert.alert("Test", "The Create Account button is working.");
     const normalizedName = fullName.trim();
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -43,7 +42,7 @@ export default function SignUpScreen() {
     if (password !== confirmPassword) {
       Alert.alert(
         "Passwords do not match",
-        "Make sure both password fields are identical.",
+        "Make sure both password fields contain the same password.",
       );
       return;
     }
@@ -73,12 +72,13 @@ export default function SignUpScreen() {
             email: normalizedEmail,
           },
         });
-
         return;
       }
 
       router.replace("/(tabs)");
-    } catch {
+    } catch (error) {
+      console.error("Sign-up error:", error);
+
       Alert.alert(
         "Something went wrong",
         "We could not create your account. Please try again.",
@@ -110,6 +110,7 @@ export default function SignUpScreen() {
             <Text style={styles.label}>Full name</Text>
 
             <TextInput
+              autoCapitalize="words"
               autoComplete="name"
               editable={!isSubmitting}
               onChangeText={setFullName}
@@ -257,12 +258,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "800",
   },
-  buttonPressed: {
-    opacity: 0.85,
-  },
-  buttonDisabled: {
-    opacity: 0.65,
-  },
   secondaryButton: {
     alignItems: "center",
     paddingVertical: 20,
@@ -274,5 +269,11 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#2563EB",
     fontWeight: "800",
+  },
+  buttonPressed: {
+    opacity: 0.85,
+  },
+  buttonDisabled: {
+    opacity: 0.65,
   },
 });
